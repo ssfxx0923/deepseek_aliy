@@ -6,8 +6,11 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 13, 17, 23;
+  --primary-color: 99, 102, 241;
+  --secondary-color: 139, 92, 246;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,7 +21,145 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  height: 100vh;
+}
+
+.gradient-text {
+  background: linear-gradient(
+    to right, 
+    rgb(var(--primary-color)), 
+    rgb(var(--secondary-color))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.deepseek-input {
+  @apply w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200;
+}
+
+.deepseek-button {
+  @apply px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-900 whitespace-nowrap;
+}
+
+.message-user {
+  @apply bg-gray-800 text-white p-3 rounded-lg shadow-sm;
+}
+
+.message-assistant {
+  @apply bg-gray-900 text-white p-3 rounded-lg border-l-4 border-indigo-500 shadow-md;
+}
+
+.reasoning-box {
+  @apply bg-gray-900/70 text-gray-300 p-3 rounded-lg border border-gray-700/50 text-sm;
+}
+
+/* 添加平滑动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* 让 prose 样式在黑暗模式下更适合 */
+.prose pre {
+  @apply bg-gray-800 text-gray-200;
+}
+
+.prose code {
+  @apply text-gray-200 bg-gray-800/60 px-1 py-0.5 rounded;
+}
+
+.prose a {
+  @apply text-indigo-400 hover:text-indigo-300;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}
+
+/* KaTeX 样式优化 */
+.katex {
+  font-size: 1.1em !important;
+  line-height: 1.5;
+  text-rendering: auto;
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1em 0;
+  margin: 1em 0;
+}
+
+.katex-display > .katex {
+  font-size: 1.21em !important;
+  text-align: center;
+  padding: 0;
+}
+
+.katex-html {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* 数学公式块样式 */
+.math-display {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+/* 行内数学公式样式 */
+.math-inline {
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+}
+
+/* KaTeX 错误提示样式 */
+.katex-error {
+  color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.1);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+/* 优化暗色模式下的公式显示 */
+@media (prefers-color-scheme: dark) {
+  .katex {
+    color: #e2e8f0;
+  }
+  
+  .math-display {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }

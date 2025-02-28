@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Deepseek AI Chat Interface
 
-## Getting Started
+基于阿里云 API 的 Deepseek 大模型聊天界面，使用 Next.js 和 TypeScript 构建的现代化 Web 应用。
 
-First, run the development server:
+## 特性
 
+- 🚀 基于 Next.js 15.2 和 React 19 构建
+- 💬 实时流式响应的聊天界面
+- 🎨 现代化深色主题 UI 设计
+- ✨ 支持 Markdown 和数学公式渲染
+- 🖥️ 代码高亮显示
+- 📱 响应式设计，支持各种设备
+- 🔒 安全的 API 密钥管理
+
+## 技术栈
+
+- **前端框架**: Next.js 15.2.0
+- **UI 框架**: TailwindCSS
+- **编程语言**: TypeScript
+- **Markdown 渲染**: React Markdown
+- **数学公式**: KaTeX
+- **代码高亮**: Rehype Highlight
+- **API 集成**: 阿里云 DashScope API
+
+## 快速开始
+
+### 前置要求
+
+- Node.js 18.0.0 或更高版本
+- 阿里云 DashScope API Key
+
+### 安装步骤
+
+1. 克隆仓库：
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [repository-url]
+cd ds-1
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. 安装依赖：
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. 配置环境变量：
+   创建 `.env.local` 文件并添加以下内容：
+```env
+DASHSCOPE_API_KEY=your_api_key_here
+ENABLE_STREAMING=true
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. 启动开发服务器：
+```bash
+npm run dev
+```
 
-## Learn More
+现在可以访问 http://localhost:3000 查看应用。
 
-To learn more about Next.js, take a look at the following resources:
+## 部署
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Vercel 部署
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. 将代码推送到 GitHub 仓库
+2. 在 Vercel 中导入该仓库
+3. 配置环境变量：
+   - `DASHSCOPE_API_KEY`
+   - `ENABLE_STREAMING`
+4. 部署完成后即可访问
 
-## Deploy on Vercel
+## 项目结构
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+ds-1/
+├── src/
+│   ├── app/
+│   │   ├── api/         # API 路由
+│   │   ├── layout.tsx   # 应用布局
+│   │   └── page.tsx     # 主页面
+│   └── components/      # React 组件
+├── public/             # 静态资源
+├── styles/            # 样式文件
+└── package.json       # 项目依赖
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 主要功能
+
+- 实时聊天界面
+- Markdown 渲染支持
+- 数学公式显示
+- 代码块语法高亮
+- 自动滚动对话
+- 响应式设计
+
+## 开发
+
+### 可用的命令
+
+- `npm run dev` - 启动开发服务器
+- `npm run build` - 构建生产版本
+- `npm run start` - 运行生产版本
+- `npm run lint` - 运行代码检查
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 许可证
+
+MIT License
