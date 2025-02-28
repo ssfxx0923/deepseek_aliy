@@ -131,140 +131,112 @@ export default function ChatInterface() {
       isStreaming: true,
     }]);
 
-    let continuationToken: string | null = null;
-
     try {
-      while (true) {
-        // 发送请求获取流式响应
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messages: [...messages, userMessage].map(msg => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-            continuationToken,
-          }),
-        });
+      // 发送请求获取流式响应
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map(msg => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        }),
+      });
+      
+      setIsSending(false);
+      
+      // 处理流式响应
+      if (response.headers.get('Content-Type')?.includes('text/event-stream')) {
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
         
-        setIsSending(false);
-        
-        // 处理流式响应
-        if (response.headers.get('Content-Type')?.includes('text/event-stream')) {
-          const reader = response.body?.getReader();
-          const decoder = new TextDecoder();
+        if (reader) {
+          let contentBuffer = '';
           
-          if (reader) {
-            let contentBuffer = '';
+          while (true) {
+            const { done, value } = await reader.read();
             
-            while (true) {
-              const { done, value } = await reader.read();
-              
-              if (done) break;
-              
-              const text = decoder.decode(value);
-              contentBuffer += text;
-              
-              // 处理多行数据
-              const lines = contentBuffer.split('\n\n');
-              contentBuffer = lines.pop() || '';
-              
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  try {
-                    const data = JSON.parse(line.substring(6));
-                    
-                    // 根据数据类型更新消息
-                    switch (data.type) {
-                      case 'reasoning':
-                        // 更新思考过程
-                        setMessages(prev => {
-                          const newMessages = [...prev];
-                          const lastMessage = newMessages[newMessages.length - 1];
-                          if (lastMessage && lastMessage.role === 'assistant') {
-                            lastMessage.reasoning = data.fullContent;
-                          }
-                          return newMessages;
-                        });
-                        break;
-                      case 'content':
-                        // 更新内容
-                        setMessages(prev => {
-                          const newMessages = [...prev];
-                          const lastMessage = newMessages[newMessages.length - 1];
-                          if (lastMessage && lastMessage.role === 'assistant') {
-                            lastMessage.content = data.fullContent;
-                          }
-                          return newMessages;
-                        });
-                        break;
-                      case 'continue':
-                        // 保存continuation token并继续请求
-                        continuationToken = data.continuationToken;
-                        setMessages(prev => {
-                          const newMessages = [...prev];
-                          const lastMessage = newMessages[newMessages.length - 1];
-                          if (lastMessage && lastMessage.role === 'assistant') {
-                            lastMessage.content = data.content;
-                            lastMessage.reasoning = data.reasoning_content;
-                          }
-                          return newMessages;
-                        });
-                        break;
-                      case 'done':
-                        // 完成流式响应
-                        setMessages(prev => {
-                          const newMessages = [...prev];
-                          const lastMessage = newMessages[newMessages.length - 1];
-                          if (lastMessage && lastMessage.role === 'assistant') {
-                            lastMessage.content = data.content;
-                            lastMessage.reasoning = data.reasoning_content;
-                            lastMessage.isStreaming = false;
-                          }
-                          return newMessages;
-                        });
-                        setLoading(false);
-                        return; // 退出整个循环
-                      case 'error':
-                        // 处理错误
-                        console.error('流响应错误:', data.error);
-                        setMessages(prev => {
-                          const newMessages = [...prev];
-                          const lastMessage = newMessages[newMessages.length - 1];
-                          if (lastMessage && lastMessage.role === 'assistant') {
-                            lastMessage.content = `抱歉，出现了错误: ${data.error}`;
-                            lastMessage.isStreaming = false;
-                          }
-                          return newMessages;
-                        });
-                        setLoading(false);
-                        return; // 退出整个循环
-                    }
-                  } catch (error) {
-                    console.error('解析SSE数据失败:', error);
+            if (done) break;
+            
+            const text = decoder.decode(value);
+            contentBuffer += text;
+            
+            // 处理多行数据
+            const lines = contentBuffer.split('\n\n');
+            contentBuffer = lines.pop() || '';
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.substring(6));
+                  
+                  // 根据数据类型更新消息
+                  switch (data.type) {
+                    case 'reasoning':
+                      // 更新思考过程
+                      setMessages(prev => {
+                        const newMessages = [...prev];
+                        const lastMessage = newMessages[newMessages.length - 1];
+                        if (lastMessage && lastMessage.role === 'assistant') {
+                          lastMessage.reasoning = data.fullContent;
+                        }
+                        return newMessages;
+                      });
+                      break;
+                    case 'content':
+                      // 更新内容
+                      setMessages(prev => {
+                        const newMessages = [...prev];
+                        const lastMessage = newMessages[newMessages.length - 1];
+                        if (lastMessage && lastMessage.role === 'assistant') {
+                          lastMessage.content = data.fullContent;
+                        }
+                        return newMessages;
+                      });
+                      break;
+                    case 'done':
+                      // 完成流式响应
+                      setMessages(prev => {
+                        const newMessages = [...prev];
+                        const lastMessage = newMessages[newMessages.length - 1];
+                        if (lastMessage && lastMessage.role === 'assistant') {
+                          lastMessage.content = data.content;
+                          lastMessage.reasoning = data.reasoning_content;
+                          lastMessage.isStreaming = false;
+                        }
+                        return newMessages;
+                      });
+                      setLoading(false);
+                      break;
+                    case 'error':
+                      // 处理错误
+                      console.error('流响应错误:', data.error);
+                      setMessages(prev => {
+                        const newMessages = [...prev];
+                        const lastMessage = newMessages[newMessages.length - 1];
+                        if (lastMessage && lastMessage.role === 'assistant') {
+                          lastMessage.content = `抱歉，出现了错误: ${data.error}`;
+                          lastMessage.isStreaming = false;
+                        }
+                        return newMessages;
+                      });
+                      setLoading(false);
+                      break;
                   }
+                } catch (error) {
+                  console.error('解析SSE数据失败:', error);
                 }
               }
             }
           }
-        } else {
-          // 非流式响应处理
-          const data = await response.json();
-          if (data.type === 'done') {
-            updateMessages(data, false);
-            break;
-          } else {
-            updateMessages(data, !response.ok);
-          }
         }
-
-        // 如果没有continuation token，说明响应已完成
-        if (!continuationToken) {
-          break;
-        }
+      } else {
+        // 非流式响应处理
+        const data = await response.json();
+        updateMessages(data, !response.ok);
       }
     } catch (error: any) {
       console.error('请求错误:', error);
