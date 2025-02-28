@@ -267,6 +267,44 @@ export default function ChatInterface() {
     }
   }, [messages]);
 
+  // 添加复制功能的组件
+  const CodeBlock = ({ inline, children, ...props }: { inline?: boolean, children: any } & any) => {
+    const [isCopied, setIsCopied] = useState(false);
+    const codeRef = useRef<HTMLElement>(null);
+
+    const handleCopy = async () => {
+      if (codeRef.current) {
+        try {
+          // 获取实际的代码内容
+          const codeContent = codeRef.current.textContent || '';
+          await navigator.clipboard.writeText(codeContent);
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000);
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+      }
+    };
+
+    if (inline) {
+      return <code className="bg-gray-800 px-1 rounded" {...props}>{children}</code>;
+    }
+
+    return (
+      <div className="relative group">
+        <button
+          onClick={handleCopy}
+          className="absolute right-2 top-2 px-2 py-1 rounded text-sm bg-gray-700 hover:bg-gray-600 transition-colors duration-200 opacity-0 group-hover:opacity-100 z-10"
+        >
+          {isCopied ? '已复制!' : '复制'}
+        </button>
+        <code ref={codeRef} className="block bg-gray-800 p-4 rounded" {...props}>
+          {children}
+        </code>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* 对话区域：固定高度且overflow-y-auto，防止高度跳变 */}
@@ -487,9 +525,7 @@ export default function ChatInterface() {
                       <h3 className="text-lg font-bold mt-4 mb-2" {...props} />
                     ),
                     code: ({node, inline, ...props}: {node: any, inline?: boolean} & any) => (
-                      inline ? 
-                        <code className="bg-gray-800 px-1 rounded" {...props} /> :
-                        <code className="block bg-gray-800 p-4 rounded" {...props} />
+                      <CodeBlock inline={inline} {...props} />
                     ),
                     // @ts-ignore
                     math: ({value}: {value: string}) => {
