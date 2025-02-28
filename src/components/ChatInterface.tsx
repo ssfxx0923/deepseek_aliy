@@ -238,7 +238,7 @@ export default function ChatInterface() {
         const data = await response.json();
         updateMessages(data, !response.ok);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('请求错误:', error);
       setIsSending(false);
       setMessages(prev => {
@@ -255,9 +255,9 @@ export default function ChatInterface() {
           }];
         }
       });
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   // 在消息更新时，根据 shouldScrollRef 决定是否滚动

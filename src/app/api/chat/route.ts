@@ -9,7 +9,7 @@ interface DeepseekChatMessage extends OpenAI.Chat.Completions.ChatCompletionMess
 // 配置 OpenAI 客户端连接阿里云 API
 const openai = new OpenAI({
   apiKey: process.env.DASHSCOPE_API_KEY || "",
-  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
 });
 
 // 检查是否启用流式响应
@@ -29,53 +29,67 @@ export async function POST(req: NextRequest) {
 
     // 如果启用了流式响应
     if (enableStreaming) {
-      // 创建一个流式响应
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
-          // 储存累积的思考过程和内容
           let accumulatedReasoning = "";
           let accumulatedContent = "";
-          
+          let currentSegment = {
+            reasoning: "",
+            content: "",
+          };
+          let currentLength = 0;
+          const SEGMENT_SIZE = 1000; // 每个段的最大长度
+
           try {
-            // 调用 Deepseek API，使用流式模式
             const completion = await openai.chat.completions.create({
-              model: "deepseek-r1", // 此处以 deepseek-r1 为例，可按需更换模型名称
+              model: "deepseek-r1",
               messages,
-              stream: true, // 启用流式输出
+              stream: true,
             });
 
-            // 处理流式响应
             for await (const chunk of completion) {
-              // 检查是否有 reasoning_content
               const reasoning = (chunk.choices[0].delta as any).reasoning_content;
               const content = chunk.choices[0].delta.content;
-              
+
+              // 立即处理并发送思考过程
               if (reasoning) {
                 accumulatedReasoning += reasoning;
-                // 发送思考过程更新
                 const data = {
                   type: "reasoning",
                   content: reasoning,
                   fullContent: accumulatedReasoning,
                 };
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+                currentSegment.reasoning += reasoning;
               }
-              
+
+              // 立即处理并发送内容
               if (content) {
                 accumulatedContent += content;
-                // 发送内容更新
                 const data = {
                   type: "content",
                   content: content,
                   fullContent: accumulatedContent,
                 };
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+                currentSegment.content += content;
               }
-              
+
+              // 累积长度计算
+              currentLength += (reasoning?.length || 0) + (content?.length || 0);
+
+              // 当累积的文本长度达到阈值时，重置段
+              if (currentLength >= SEGMENT_SIZE) {
+                currentSegment = {
+                  reasoning: "",
+                  content: "",
+                };
+                currentLength = 0;
+              }
+
               // 如果流结束
               if (chunk.choices[0].finish_reason) {
-                // 发送完成信号
                 const data = {
                   type: "done",
                   reasoning_content: accumulatedReasoning,
@@ -86,10 +100,9 @@ export async function POST(req: NextRequest) {
               }
             }
           } catch (error: any) {
-            // 发送错误消息
             const data = {
               type: "error",
-              error: error.message,
+              error: error.message || "处理请求时出错",
             };
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
             controller.close();
@@ -98,25 +111,23 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // 返回 SSE 流
       return new Response(stream, {
         headers: {
           'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-transform',
           'Connection': 'keep-alive',
+          'X-Accel-Buffering': 'no',
+          'Transfer-Encoding': 'chunked'
         },
       });
     } else {
-      // 非流式模式，使用普通请求
       const completion = await openai.chat.completions.create({
-        model: "deepseek-r1", // 此处以 deepseek-r1 为例，可按需更换模型名称
+        model: "deepseek-r1",
         messages,
       });
 
-      // 使用自定义类型处理返回内容
       const message = completion.choices[0].message as unknown as DeepseekChatMessage;
 
-      // 返回响应
       return NextResponse.json({
         content: message.content,
         reasoning_content: message.reasoning_content,
