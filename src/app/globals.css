@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @theme {
   --font-sans: var(--font-geist-sans);
@@ -20,46 +22,50 @@
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    rgb(var(--background-start-rgb)),
-    rgb(var(--background-end-rgb))
-  );
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  height: 100vh;
+@layer base {
+  body {
+    color: rgb(var(--foreground-rgb));
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    );
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    height: 100vh;
+  }
 }
 
-.gradient-text {
-  background: linear-gradient(
-    to right, 
-    rgb(var(--primary-color)), 
-    rgb(var(--secondary-color))
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+@layer components {
+  .gradient-text {
+    background: linear-gradient(
+      to right, 
+      rgb(var(--primary-color)), 
+      rgb(var(--secondary-color))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 
-.deepseek-input {
-  @apply w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200;
-}
+  .deepseek-input {
+    @apply w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200;
+  }
 
-.deepseek-button {
-  @apply px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-900 whitespace-nowrap;
-}
+  .deepseek-button {
+    @apply px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-900 whitespace-nowrap;
+  }
 
-.message-user {
-  @apply bg-gray-800 text-white p-3 rounded-lg shadow-sm;
-}
+  .message-user {
+    @apply bg-gray-800 text-white p-3 rounded-lg shadow-sm;
+  }
 
-.message-assistant {
-  @apply bg-gray-900 text-white p-3 rounded-lg border-l-4 border-indigo-500 shadow-md;
-}
+  .message-assistant {
+    @apply bg-gray-900 text-white p-3 rounded-lg border-l-4 border-indigo-500 shadow-md;
+  }
 
-.reasoning-box {
-  @apply bg-gray-900/70 text-gray-300 p-3 rounded-lg border border-gray-700/50 text-sm;
+  .reasoning-box {
+    @apply bg-gray-900/70 text-gray-300 p-3 rounded-lg border border-gray-700/50 text-sm;
+  }
 }
 
 /* 添加平滑动画 */
