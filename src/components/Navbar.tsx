@@ -17,7 +17,7 @@ export default function Navbar() {
         {/* 右侧：GitHub 链接 */}
         <div className="flex items-center space-x-4">
           <a 
-            href="https://github.com/yourusername/deepseek-clone" 
+            href="https://github.com/ssfxx0923/deepseek_aliy" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition duration-200"

@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Deepseek Clone - 阿里云 API 驱动的 AI 对话",
-  description: "基于阿里云 API 的 Deepseek 模型",
+  title: "Deepseek-ssfxx --7702专属",
+  description: "本站仅供7702会员使用",
 };
 
 export default function RootLayout({
